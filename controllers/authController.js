@@ -13,24 +13,51 @@ async function registrationController(req, res) {
 		},
 	})
 
-	
+	let {
+		first_name,
+		last_name,
+		email,
+		phone,
+		address1,
+		address2,
+		city,
+		post_code,
+		country,
+		password,
+		newsletter,
+	} = req.body
 
-	let { name, email, password } = req.body
+	const userExist = await userModel.findOne({email})
+
+	if (userExist){
+		res.status(200).send({valid: false, error: "An account with same email already exists"})
+		return
+	}
 
 	bcrypt.hash(password, 5, async (err, hashedPass) => {
 		const user = new userModel({
-			name,
+			first_name,
+			last_name,
+			fullname: first_name + " " + last_name,
 			email,
+			phone,
+			address1,
+			address2,
+			city,
+			post_code,
+			country,
 			password: hashedPass,
+			newsletter,
 		})
 
-		const encryptedString = encryptString(email + "|verified_user" )
+		const encryptedString = encryptString(email + "|verified_user")
 
-        const source = '<div style= "font-family: sans-serif; font-size: 19px"><span style="margin-bottom: 20px">Hello</span><p style="margin-bottom: 20px">Please click on the button below to verify your account for Orebi Ecommerse.</p><a href="http://localhost:5173/verifyUser/{{id}}" target="_blank"><button style="padding: 10px 20px; background-color: #262626;color: white;font-size: 16px; border-style: none; cursor: pointer;">Verify</button></a></div>'
+		const source =
+			'<div style= "font-family: sans-serif; font-size: 19px"><span style="margin-bottom: 20px">Hello</span><p style="margin-bottom: 20px">Please click on the button below to verify your account for Orebi Ecommerse.</p><a href="http://localhost:5173/verifyUser/{{id}}" target="_blank"><button style="padding: 10px 20px; background-color: #262626;color: white;font-size: 16px; border-style: none; cursor: pointer;">Verify</button></a></div>'
 
-        const template = handleBars.compile(source)
+		const template = handleBars.compile(source)
 
-        const result = template({"id": encryptedString})
+		const result = template({ id: encryptedString })
 
 		try {
 			await user.save()
@@ -42,9 +69,9 @@ async function registrationController(req, res) {
 				html: result,
 			})
 
-			res.send({ message: "Email send" })
+			res.status(200).send({valid: true, message: "Registration Successfull!"})
 		} catch (error) {
-			res.send(error)
+			res.status(400).send({valid: false, error})
 		}
 	})
 }
@@ -52,19 +79,27 @@ async function registrationController(req, res) {
 async function loginController(req, res) {
 	let { email, password } = req.body
 
-	const user = await userModel.findOne({ email })
+	
 
-	if (user) {
-		bcrypt.compare(password, user.password, (error, result) => {
-			if (result) {
-				res.send(user)
-			} else {
-				res.send({ error: "Invalid credentials" })
-			}
-		})
-	} else {
-		res.send({ error: "Invalid credentials" })
+	try {
+		const user = await userModel.findOne({ email })
+
+		if (user) {
+			bcrypt.compare(password, user.password, (error, result) => {
+				if (result) {
+					res.status(200).send({valid: true, message: "Login Successfull!"})
+				} else {
+					res.status(200).send({valid: false, error: "Invalid credentials"})
+				}
+			})
+		} else {
+			res.status(200).send({valid: false, error: "Invalid credentials"})
+		}
+		
+	} catch (error) {
+		res.status(400).send({valid: false, error})
 	}
+	
 }
 
 module.exports = { registrationController, loginController }

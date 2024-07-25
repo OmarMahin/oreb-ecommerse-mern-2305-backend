@@ -3,6 +3,12 @@ const nodemailer = require("nodemailer")
 const handleBars = require("handlebars")
 const bcrypt = require("bcrypt")
 const { encryptString } = require("../helpers/encryption")
+const {
+	generateAccesssTokenForMembers,
+	generateRefreshTokenForMembers,
+	generateAccesssTokenForAdmin,
+	generateRefreshTokenForAdmin,
+} = require("../helpers/jwtHandler")
 
 async function registrationController(req, res) {
 	const transporter = nodemailer.createTransport({
@@ -27,10 +33,10 @@ async function registrationController(req, res) {
 		newsletter,
 	} = req.body
 
-	const userExist = await userModel.findOne({email})
+	const userExist = await userModel.findOne({ email })
 
-	if (userExist){
-		res.status(200).send({valid: false, error: "An account with same email already exists"})
+	if (userExist) {
+		res.status(200).send({ valid: false, error: "An account with same email already exists" })
 		return
 	}
 
@@ -69,37 +75,51 @@ async function registrationController(req, res) {
 				html: result,
 			})
 
-			res.status(200).send({valid: true, message: "Registration Successfull!"})
+			res.status(200).send({ valid: true, message: "Registration Successfull!" })
 		} catch (error) {
-			res.status(400).send({valid: false, error})
+			res.status(400).send({ valid: false, error })
 		}
 	})
 }
 
-async function loginController(req, res) {
+async function loginController(req, res, verifyFor) {
 	let { email, password } = req.body
-
-	
 
 	try {
 		const user = await userModel.findOne({ email })
-
 		if (user) {
 			bcrypt.compare(password, user.password, (error, result) => {
 				if (result) {
-					res.status(200).send({valid: true, message: "Login Successfull!"})
+					if (user.role == "admin" && verifyFor == 'admin') {
+						generateAccesssTokenForAdmin(req, res, user.id)
+						generateRefreshTokenForAdmin(req, res, user.id)
+					} else if ((user.role == "member" || user.role == "merchant" || user.role == "admin") && verifyFor == 'member') {
+						generateAccesssTokenForMembers(req, res, user.id)
+						generateRefreshTokenForMembers(req, res, user.id)
+					}
+					else{
+						res.status(200).send({ valid: false, error: "Invalid credentials" })
+						return
+					}
+					res.status(200).send({ valid: true, message: "Login Successfull!" })
 				} else {
-					res.status(200).send({valid: false, error: "Invalid credentials"})
+					res.status(200).send({ valid: false, error: "Invalid credentials" })
 				}
 			})
 		} else {
-			res.status(200).send({valid: false, error: "Invalid credentials"})
+			res.status(200).send({ valid: false, error: "Invalid credentials" })
 		}
-		
 	} catch (error) {
-		res.status(400).send({valid: false, error})
+		res.status(400).send({ valid: false, error })
 	}
-	
 }
 
-module.exports = { registrationController, loginController }
+async function memberLogin(req, res){
+	await loginController(req, res, 'member')
+}
+
+async function adminLogin(req, res){
+	await loginController(req, res, 'admin')
+}
+
+module.exports = { registrationController, memberLogin, adminLogin }

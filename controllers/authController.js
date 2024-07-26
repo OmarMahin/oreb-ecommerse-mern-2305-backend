@@ -8,6 +8,7 @@ const {
 	generateRefreshTokenForMembers,
 	generateAccesssTokenForAdmin,
 	generateRefreshTokenForAdmin,
+	generateLogoutTokens,
 } = require("../helpers/jwtHandler")
 
 async function registrationController(req, res) {
@@ -122,4 +123,15 @@ async function adminLogin(req, res){
 	await loginController(req, res, 'admin')
 }
 
-module.exports = { registrationController, memberLogin, adminLogin }
+async function logoutController(req, res){
+	try {
+		generateLogoutTokens(req, res)
+		res.status(200).send({ success: "User logged out" })
+	} catch (error) {
+		console.log(error)
+	}
+	
+	
+}
+
+module.exports = { registrationController, memberLogin, adminLogin, logoutController }

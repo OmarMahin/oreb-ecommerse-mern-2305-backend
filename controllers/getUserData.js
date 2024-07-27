@@ -10,10 +10,10 @@ async function get_all_users(req, res) {
 	}
 }
 
-async function get_one_user_by_id(req, res){
-    let [id] = req.body
+async function get_user_by_email(req, res){
+    let {email} = req.body
     try {
-		const user = await userModel.findOne({_id: id})
+		const user = await userModel.findOne({email})
 		res.status(200).send({ success: true, data: user })
 	} catch (error) {
 		console.log(error)
@@ -22,4 +22,4 @@ async function get_one_user_by_id(req, res){
 }
 
 
-module.exports = {get_all_users, get_one_user_by_id}
+module.exports = {get_all_users, get_user_by_email}

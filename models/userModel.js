@@ -74,6 +74,18 @@ const userSchema = new mongoose.Schema({
         default: "member",
         enum: ["member", "admin", "merchant"]
     },
+    otp:{
+        type: Number,
+        default: null,
+    },
+    otpAt: {
+        type: Number,
+        default: null,
+    },
+    otpExpireTime: {
+        type: Number,
+        default: null,
+    }
 }, {timestamps: true})
 
 

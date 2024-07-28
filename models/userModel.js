@@ -75,7 +75,7 @@ const userSchema = new mongoose.Schema({
         enum: ["member", "admin", "merchant"]
     },
     otp:{
-        type: Number,
+        type: String,
         default: null,
     },
     otpAt: {

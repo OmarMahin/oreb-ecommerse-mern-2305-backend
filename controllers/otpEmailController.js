@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel")
 const nodemailer = require("nodemailer")
 const handleBars = require("handlebars")
+const { encryptString } = require("../helpers/encryption")
 
 async function sendOTP(req, res) {
 	let { email } = req.body
@@ -66,19 +67,32 @@ async function verifyOtp(req, res) {
 		const current_time = Math.floor(Date.now() / 1000)
 
 		try {
-			await userModel.findOneAndUpdate(
-				{ email },
-				{
-					otp: null,
-					otpAt: null,
-					otpExpireTime: null,
-				},
-				{ new: true }
-			)
-
 			if (user_otp == otp && current_time - otp_time <= otp_expireTime) {
-				res.status(200).send({ success: true, data: { id: user._id } })
+
+				const pageLink = user._id + "|" + Date.now()
+				const encryptedString = encryptString(pageLink)
+
+				await userModel.findOneAndUpdate(
+					{ email },
+					{
+						otp: encryptedString,
+						otpAt: null,
+						otpExpireTime: null,
+					},
+					{ new: true }
+				)
+				res.status(200).send({ success: true, data: { link: encryptedString } })
 				return
+			} else {
+				await userModel.findOneAndUpdate(
+					{ email },
+					{
+						otp: null,
+						otpAt: null,
+						otpExpireTime: null,
+					},
+					{ new: true }
+				)
 			}
 
 			res.status(200).send({ success: false, error: "Invalid otp" })

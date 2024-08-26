@@ -7,5 +7,4 @@ _router.post("/member_login", memberLogin)
 _router.post("/admin_login", adminLogin)
 _router.get("/logout", logoutController)
 
-
 module.exports = _router

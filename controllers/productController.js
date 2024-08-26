@@ -85,4 +85,13 @@ async function getCategoryAndShopList(req, res) {
 	}
 }
 
-module.exports = { addProduct, getCategoryAndShopList }
+async function getAllProducts(req, res) {
+	try {
+		const products = await productModel.find({})
+		res.status(200).send({ success: true, data: products })
+	} catch (error) {
+		res.status(200).send({ success: false, error })
+	}
+}
+
+module.exports = { addProduct, getCategoryAndShopList, getAllProducts }

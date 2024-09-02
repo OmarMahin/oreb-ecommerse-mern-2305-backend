@@ -94,4 +94,17 @@ async function getAllProducts(req, res) {
 	}
 }
 
-module.exports = { addProduct, getCategoryAndShopList, getAllProducts }
+async function getSingleProduct(req, res) {
+	const { id } = req.body
+	try {
+		const product = await productModel.findOne({ _id: id })
+		if (!product) {
+			return res.status(200).send({ success: false, error: "Product not found" })
+		}
+		res.status(200).send({ success: true, data: product })
+	} catch (error) {
+		res.status(200).send({ success: false, error })
+	}
+}
+
+module.exports = { addProduct, getCategoryAndShopList, getAllProducts, getSingleProduct }

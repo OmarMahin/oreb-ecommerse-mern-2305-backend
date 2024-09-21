@@ -45,6 +45,14 @@ const productSchema = new mongoose.Schema(
 			required: true,
 			enum: ["Electronics", "Appliances", "Food", "Clothes"],
 		},
+		totalReviews: {
+			type: Number,
+			default: 0,
+		},
+		totalRatings: {
+			type: Number,
+			default: 0,
+		},
 	},
 	{ timestamps: true }
 )

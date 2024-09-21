@@ -7,6 +7,8 @@ const category = require("./category")
 const files = require("./files")
 const product = require('./product')
 const shop = require('./shop')
+const review = require('./review')
+const cart = require('./cart')
 
 _router.use("/auth", auth)
 _router.use("/verify", verify)
@@ -15,6 +17,8 @@ _router.use("/category", category)
 _router.use("/file", files)
 _router.use("/product", product)
 _router.use("/shop", shop)
+_router.use("/review", review)
+_router.use("/cart", cart)
 
 
 module.exports = _router
